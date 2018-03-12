@@ -3,6 +3,8 @@ package com.wekj.ner;
 import com.wekj.ner.rule.Rule;
 import com.wekj.ner.struct.Attr;
 import com.wekj.ner.tool.AttrTool;
+import com.wekj.ner.tool.WordToNum;
+import com.wekj.ner.utils.NumUtils;
 import com.wekj.ner.utils.StreamUtils;
 import org.ansj.domain.Result;
 import org.ansj.domain.Term;
@@ -21,11 +23,18 @@ public class NumNer {
                         nextWord.getNatureStr().equalsIgnoreCase("en")
                 ) &&
                 word.getNatureStr().equalsIgnoreCase("m")){
+            //数词+量词及疑似量词
             attr = new Attr();
             attr.setNumstr(word.getName());
             attr.setUnit(nextWord.getName());
         }
         else if(word.getNatureStr().equalsIgnoreCase("m")){
+            //数词
+            attr = new Attr();
+            attr.setNumstr(word.getName());
+        }
+        else if(word.getNatureStr().equalsIgnoreCase("mq")){
+            //数量词
             attr = new Attr();
             attr.setNumstr(word.getName());
         }
@@ -65,6 +74,9 @@ public class NumNer {
             }
         }
 
+        System.out.println(terms);
+        System.out.println(newTerms);
+
         List<Attr> attrs = new ArrayList<>(newTerms.size());
         for (int i = 0; i < newTerms.size(); i++) {
             Term curTerm = newTerms.get(i);
@@ -88,6 +100,8 @@ public class NumNer {
                 continue;
             }
 
+            AttrTool.guessAttrName(curAttr);
+
             nextAttr = null;
             int nextIndex = i + 1;
             if(nextIndex < attrs.size()) {
@@ -101,9 +115,15 @@ public class NumNer {
             result.add(curAttr);
         }
 
-        for (Attr attr : result) {
+        Iterator<Attr> iterator = result.iterator();
+        while (iterator.hasNext()) {
             //数字文字转数字
-//            WordToNum.trans(attr);
+            Attr attr = iterator.next();
+            WordToNum.trans(attr);
+            if(NumUtils.isZero5(attr.getNum()) || Double.isNaN(attr.getNum())) {
+                iterator.remove();
+                continue;
+            }
             //根据单位猜测属性
             AttrTool.guessAttrName(attr);
         }
@@ -129,28 +149,58 @@ public class NumNer {
     public static void main(String[] args) {
         MyStaticValue.isQuantifierRecognition = false;
         NumNer ner = new NumNer();
-        String question;
-        question = "168 体重108 穿多大的合适";
+        String question;/*
+        question = "我188cm130kg可以穿吧";
         System.out.println(question + "\t" + ner.anaQuestion(question));
-//        question = "1.68左右，体重100斤左右。";
-//        System.out.println(question + "\t" + ner.anaQuestion(question));
-//        question = "我1点88米1两30公斤可以穿吧";
-//        System.out.println(question + "\t" + ner.anaQuestion(question));
-//        question = "我身高188,然后1两30公斤可以穿吧";
-//        System.out.println(question + "\t" + ner.anaQuestion(question));
-//        question = "我身高1.88,然后1两30公斤可以穿吧";
-//        System.out.println(question + "\t" + ner.anaQuestion(question));
-//        question = "我身高1点88,然后1两30公斤可以穿吧";
-//        System.out.println(question + "\t" + ner.anaQuestion(question));
-//        question = "身高176体重210穿哪个码";
-//        System.out.println(question + "\t" + ner.anaQuestion(question));
-//        question = "一百七十五斤一米七五";
-//        System.out.println(question + "\t" + ner.anaQuestion(question));
-//
-//        try {
-//            ner.testFile("D:\\xiaowei\\20180309\\新建文本文档.txt");
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
+        question = "我188厘米130公斤可以穿吧";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "我1点88米1两30公斤可以穿吧";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "我身高188,然后1两30公斤可以穿吧";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "我身高1.88,然后1两30公斤可以穿吧";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "我身高1点88,然后1两30公斤可以穿吧";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "身高176体重210穿哪个码";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "一百七十五斤一米七五";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "嗯一米七，一百二十斤左右穿多大？";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "一米六八一百斤左右。";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "额一八五230斤，三尺二腰能穿么";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "1.73米，195斤";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "我170，117斤，修身点，穿多大穿";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "1.6米";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "身高170体重70多斤";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "身高170体重70㎏";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+        question = "172，190斤，腰围2尺8、9";
+        System.out.println(question + "\t" + ner.anaQuestion(question));*/
+        question = "173高110斤穿什么号码";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+
+        question = "180多斤";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+
+        question = "172，190斤，腰围2尺8";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+
+        question = "190斤，1米72";
+        System.out.println(question + "\t" + ner.anaQuestion(question));
+/*
+        try {
+            ner.testFile("D:\\xiaowei\\20180309\\新建文本文档.txt");
+            ner.testFile("D:\\xiaowei\\20180312\\数字识别.txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }*/
     }
 }

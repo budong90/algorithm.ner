@@ -56,6 +56,6 @@ public class Attr {
     }
 
     public String toString() {
-        return this.attribute + "\t" + this.numstr + "\t" + this.num + "\t" + this.unit;
+        return this.attribute + "|" + this.numstr + "|" + this.num + "|" + this.unit;
     }
 }

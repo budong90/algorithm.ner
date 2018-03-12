@@ -39,8 +39,10 @@ public class WordToNum {
 
         decimalMap.add("点");
         decimalMap.add("點");
+        decimalMap.add(".");
         decimalMap2.add("米");
         decimalMap2.add("斤");
+        decimalMap2.add("尺");
 
         unitMap.put("十", 10);
         unitMap.put("百", 100);
@@ -113,6 +115,9 @@ public class WordToNum {
             }
         }
 
+        //对各个位数的进制进行处理
+        resizeUnit(unit, temp);
+
         double value = 0.0;
         try {
             for(int i = 0; i < temp.length; i++){
@@ -124,6 +129,7 @@ public class WordToNum {
                     if(unit[i] > 0) {
                         unitV = unit[i];
                     }
+
                     value += pv * unitV;
                 }
                 else {
@@ -134,35 +140,88 @@ public class WordToNum {
         catch (Exception e) {
             return;
         }
-
+        //识别数字
         BigDecimal bigDecimal = new BigDecimal(value);
         attr.setNum(bigDecimal.setScale(8, BigDecimal.ROUND_HALF_DOWN).doubleValue());
     }
 
+    /**
+     * 通用进制赋值
+     * @param unit 进制
+     * @param temp 各位数值
+     */
+    private static void resizeUnit(double[] unit, char[] temp){
+        //随便一个值，反正不是10的倍数或者1或者0.1的N次方即可
+        //选择99是因为数字吉利
+        double base = 99;
+        int pos = -1;
+
+        for(int j = 0; j < unit.length - 1; j++) {
+            double v = unit[j];
+            if(v > 0){
+                pos = j;
+                base = v;
+                break;
+            }
+        }
+
+        if(base == 99){
+            //此时读不到任何信息,那么倒数第二数反向推导进制，注意位数信息数组比数值信息数组长度多一
+            pos = 2;
+
+            for(int j = 0; j < unit.length - 1; j++) {
+                char num = temp[j];
+                if (num == EMPTY_CHAR) {
+                    //这种情况表示数字文字可能不是纯数字，后面存在合并的单位或者“左右”，“多”之类的词
+                    pos = unit.length - j + 1;
+                    break;
+                }
+            }
+
+            base = 1;
+            for(int j = unit.length - pos; j >= 0; j--) {
+                unit[j] = base;
+                base = base * 10;
+            }
+        }
+    }
+
     public static void main(String[] args) {
         Attr attr = new Attr();
-//        attr.setNumstr("一百八十七");
-//        trans(attr);
-//        System.out.println(attr.getNum());
-//
-//        attr.setNumstr("198");
-//        trans(attr);
-//        System.out.println(attr.getNum());
-//
-//        attr.setNumstr("1.98");
-//        trans(attr);
-//        System.out.println(attr.getNum());
-//
-//        attr.setNumstr("一点零八零七");
-//        trans(attr);
-//        System.out.println(attr.getNum());
-//
-//        attr.setNumstr("一米七五");
-//        trans(attr);
-//        System.out.println(attr.getNum());
+        attr.setNumstr("一百八十七");
+        trans(attr);
+        System.out.println(attr.getNumstr() + "\t" + attr.getNum());
+
+        attr.setNumstr("198");
+        trans(attr);
+        System.out.println(attr.getNumstr() + "\t" + attr.getNum());
+
+        attr.setNumstr("1.98");
+        trans(attr);
+        System.out.println(attr.getNumstr() + "\t" + attr.getNum());
+
+        attr.setNumstr("一点零八零七");
+        trans(attr);
+        System.out.println(attr.getNumstr() + "\t" + attr.getNum());
+
+        attr.setNumstr("一米七五");
+        trans(attr);
+        System.out.println(attr.getNumstr() + "\t" + attr.getNum());
 
         attr.setNumstr("一八五230");
         trans(attr);
-        System.out.println(attr.getNum());
+        System.out.println(attr.getNumstr() + "\t" + attr.getNum());
+
+        attr.setNumstr("五九千二百");
+        trans(attr);
+        System.out.println(attr.getNumstr() + "\t" + attr.getNum());
+
+        attr.setNumstr("70多斤");
+        trans(attr);
+        System.out.println(attr.getNumstr() + "\t" + attr.getNum());
+
+        attr.setNumstr("700里面左右");
+        trans(attr);
+        System.out.println(attr.getNumstr() + "\t" + attr.getNum());
     }
 }

@@ -40,8 +40,21 @@ public class AttrTool {
         set.add("斤");
         set.add("公斤");
         set.add("kg");
+        set.add("㎏");
 
         UnitFamilies.put("体重", set);
+
+        set = new HashSet<String>();
+        set.add("腰围");
+        set.add("腰");
+
+        KeyWordsFamilies.put("腰围", set);
+
+        set = new HashSet<String>();
+        set.add("尺");
+        set.add("寸");
+
+        UnitFamilies.put("腰围", set);
     }
 
     public static void guessAttrName(Attr attr) {

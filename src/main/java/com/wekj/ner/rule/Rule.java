@@ -16,17 +16,19 @@ public class Rule {
             return true;
         }
 
-        if(token.getName().equalsIgnoreCase("一米")){
+        if(token.getName().equalsIgnoreCase("两米") ||
+                token.getName().equalsIgnoreCase("米") ||
+                token.getName().equalsIgnoreCase("一米")){
             token.setNature(NATURE_M);
             return true;
         }
 
-        if(token.getName().equalsIgnoreCase("两米")){
-            token.setNature(NATURE_M);
-            return true;
-        }
-
-        if(token.getName().equalsIgnoreCase("米")){
+        if(token.getName().equalsIgnoreCase("一尺") ||
+                token.getName().equalsIgnoreCase("二尺") ||
+                token.getName().equalsIgnoreCase("两尺") ||
+                token.getName().equalsIgnoreCase("三尺") ||
+                token.getName().equalsIgnoreCase("尺")
+                ){
             token.setNature(NATURE_M);
             return true;
         }

@@ -1,7 +1,9 @@
 package com.wekj.ner;
 
+import com.wekj.ner.struct.Attr;
 import org.ansj.util.MyStaticValue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,8 +18,10 @@ import java.util.regex.Pattern;
 public class HeightWeightBiz {
 
     private String text;
-    private int minHeight, maxHeight, minWeight, maxWeight;
-    private Map<String, String> metadata;
+    private int minHeight = 130, maxHeight = 210, minWeight = 70, maxWeight = 300;
+    private Map<String, Integer> metadata;
+    private Pattern pattern;
+    private Matcher matcher;
 
     public static void main(String[] args) {
         MyStaticValue.isQuantifierRecognition = false;
@@ -33,7 +37,12 @@ public class HeightWeightBiz {
         this.text = text;
     }
 
-    public HeightWeightBiz(String text, int minHeight, int maxHeight, int minWeight, int maxWeight, Map<String, String> metadata) {
+    public HeightWeightBiz(String text, Map<String, Integer> metadata) {
+        this.text = text;
+        this.metadata = metadata;
+    }
+
+    public HeightWeightBiz(String text, int minHeight, int maxHeight, int minWeight, int maxWeight, Map<String, Integer> metadata) {
         this.text = text;
         this.minHeight = minHeight;
         this.maxHeight = maxHeight;
@@ -95,15 +104,35 @@ public class HeightWeightBiz {
     }
 
     /**
+     * 特殊问法解析
+     */
+    private void parseSpecial() {
+
+    }
+
+    public void parseData() {
+        MyStaticValue.isQuantifierRecognition = false;
+        NumNer ner = new NumNer();
+        List<Attr> attrs = ner.anaQuestion(text);
+        if (null == attrs || attrs.size() < 1) {
+            return;
+        }
+        attrs.forEach(attr -> {
+            attr.getAttribute();
+            attr.getNumstr();
+            attr.getUnit();
+        });
+    }
+
+    /**
      * 校验正则是否匹配
      *
      * @param text
      * @param regex
-     * @param matcher
      * @return
      */
-    private boolean regexMatch(String text, String regex, Matcher matcher) {
-        Pattern pattern = Pattern.compile(regex);
+    private boolean regexMatch(String text, String regex) {
+        pattern = Pattern.compile(regex);
         matcher = pattern.matcher(text);
         return matcher.find();
     }
